@@ -7,7 +7,7 @@
       </md-menu-content>
     </md-menu>
 
-    <md-table v-model="attribute_name" md-card>
+    <md-table md-card>
       <md-table-toolbar>
         <h1 class="md-title">{{attribute_name}}</h1>
       </md-table-toolbar>
