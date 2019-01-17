@@ -3,7 +3,12 @@
     <md-menu md-direction="bottom-start">
       <md-button md-menu-trigger>Add {{attribute_name}}</md-button>
       <md-menu-content>
-        <md-menu-item v-for="attribute in attributes_list" :key="attribute.id" v-on:click="attributes.push(attribute)">{{attribute.name}}</md-menu-item>
+        <div v-for="category in attributes_list">
+          <md-divider></md-divider>
+          <md-subheader>{{category[0].category}}</md-subheader>
+          <md-divider></md-divider>
+          <md-menu-item class="menu-item" v-for="attribute in category" :key="attribute.id" v-on:click="attributes.push(attribute)">{{attribute.name}}</md-menu-item>
+        </div>
       </md-menu-content>
     </md-menu>
 
@@ -36,4 +41,14 @@ export default {
 };
 </script>
 
-<style></style>
+<style scoped>
+  .md-dense {
+    min-height: 30px;
+  }
+  .md-subheader {
+    min-height: 0;
+  }
+  .menu-item > button > div {
+    min-height: 0;
+  }
+</style>

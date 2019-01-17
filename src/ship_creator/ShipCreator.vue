@@ -45,15 +45,15 @@
 
         <div class="md-layout md-gutter form">
           <div class="md-layout-item">
-            <SelectionTable attribute_name="Weapon" :attributes="shipForm.weapons" :attributes_list="weapons_list"></SelectionTable>
+            <SelectionTable attribute_name="Weapon" :attributes="shipForm.weapons" :attributes_list="groupBy(weapons_list, 'category')"></SelectionTable>
           </div>
 
           <div class="md-layout-item">
-            <SelectionTable attribute_name="Utility" :attributes="shipForm.utilities" :attributes_list="utilities_list"></SelectionTable>
+            <SelectionTable attribute_name="Utility" :attributes="shipForm.utilities" :attributes_list="groupBy(utilities_list, 'category')"></SelectionTable>
           </div>
 
           <div class="md-layout-item">
-            <SelectionTable attribute_name="Defense" :attributes="shipForm.defenses" :attributes_list="defenses_list"></SelectionTable>
+            <SelectionTable attribute_name="Defense" :attributes="shipForm.defenses" :attributes_list="groupBy(defenses_list, 'category')"></SelectionTable>
           </div>
         </div>
         <md-button type="submit" class="md-primary" :disabled="sending">Create ship</md-button>
@@ -121,6 +121,9 @@ export default {
     },
   },
   methods: {
+    addShip() {
+      this.$store.commit('addShip', this.shipForm);
+    },
     getShipFromName(shipName) {
       if (shipName) {
         return this.ships.filter(obj => obj.name === shipName);
@@ -139,6 +142,12 @@ export default {
       const base = this.getShipFromName(this.shipForm.selected_ship_name);
       this.baseStats.el = this.getAvailableElements(base[0].slot);
       this.baseStats.shield = this.getBaseShield();
+      this.baseStats.armor = this.getBaseArmor();
+      this.baseStats.damage = this.getBaseDamage();
+      this.baseStats.cp = this.getCommandPoint();
+      this.baseStats.hull = this.getHullPoint();
+      this.baseStats.evasion = this.getEvasion();
+      this.baseStats.speed = this.getSpeed();
     },
     getAvailableElements(slot) {
       const base = slot;
@@ -179,6 +188,7 @@ export default {
       this.sending = true;
 
       // Instead of this timeout, here you can call your API
+      this.addShip();
       window.setTimeout(() => {
         this.lastShip = this.shipForm.name;
         this.shipSaved = true;
@@ -195,12 +205,81 @@ export default {
     },
     getBaseShield() {
       let totalBaseShield = 0;
+      let percentageShield = 0;
       Object.values(this.shipForm.defenses).forEach((defense) => {
         if (defense.category === 'shield') {
           totalBaseShield += defense.defense;
         }
       });
+      Object.values(this.shipForm.utilities).forEach((utility) => {
+        if (utility.utility.shield) {
+          percentageShield += utility.utility.shield;
+        }
+      });
+      totalBaseShield *= ((100 + percentageShield) / 100);
       return totalBaseShield;
+    },
+    getBaseArmor() {
+      let totalBaseArmor = 0;
+      Object.values(this.shipForm.defenses).forEach((defense) => {
+        if (defense.category === 'armor') {
+          totalBaseArmor += defense.defense;
+        }
+      });
+      return totalBaseArmor;
+    },
+    getBaseDamage() {
+      let totalBaseDamage = 0;
+      Object.values(this.shipForm.weapons).forEach((weapon) => {
+        totalBaseDamage += weapon.damage;
+      });
+      return totalBaseDamage;
+    },
+    getCommandPoint() {
+      if (this.shipForm.selected_ship_name) {
+        const shipType = this.ships.filter(ship => ship.name === this.shipForm.selected_ship_name);
+        return shipType[0].cp;
+      }
+      return 0;
+    },
+    getHullPoint() {
+      if (this.shipForm.selected_ship_name) {
+        const shipType = this.ships.filter(ship => ship.name === this.shipForm.selected_ship_name);
+        return shipType[0].base_hull;
+      }
+      return 0;
+    },
+    getSpeed() {
+      if (this.shipForm.selected_ship_name) {
+        const shipType = this.ships.filter(ship => ship.name === this.shipForm.selected_ship_name);
+        return shipType[0].base_speed;
+      }
+      return 0;
+    },
+    getEvasion() {
+      if (this.shipForm.selected_ship_name) {
+        const shipType = this.ships.filter(ship => ship.name === this.shipForm.selected_ship_name);
+        return shipType[0].base_evasion;
+      }
+      return 0;
+    },
+    groupBy(collection, property) {
+      let i = 0;
+      let val = 0;
+      let index = 0;
+      let values = [];
+      let result = [];
+      for (; i < collection.length; i++) {
+        val = collection[i][property];
+        index = values.indexOf(val);
+        if (index > -1) {
+          result[index].push(collection[i]);
+        } else {
+          values.push(val);
+          result.push([collection[i]]);
+        }
+      }
+      return result;
     },
   },
 };

@@ -10,15 +10,23 @@
       ultrices feugiat. Donec sapien est, pulvinar et commodo nec, aliquet et dui. Cras laoreet vel
       odio vitae condimentum. Curabitur suscipit libero justo, ac mattis tortor commodo quis.
     </p>
-    <md-button class="md-raised md-primary" @click="$router.push('/configurator')">
+    <md-button class="md-raised md-primary" @click="apiTest()">
       Get started !
     </md-button>
   </div>
 </template>
 
 <script>
+import shipAPI from '../services/api/ship';
+
 export default {
   name: 'HomePage',
+  methods: {
+    apiTest() {
+      shipAPI.test()
+        .then(data => console.log(data));
+    },
+  },
 };
 </script>
 
